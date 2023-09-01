@@ -1,0 +1,10 @@
+This is a file with a few variables: #{FOO}, #{BAR}, and #{BAZ}.
+
+On other lines there is even #{FOOBAR}
+
+This file also contains filters:
+#{VERSION | VersionMajor}
+#{VERSION | VersionMinor}
+#{VERSION | VersionPatch}
+
+This file also contains variable that should not be changed: ##{THIS_IS_NOT_VARIABLE}

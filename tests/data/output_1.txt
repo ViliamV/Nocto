@@ -1,0 +1,2 @@
+This is just a file without variables.
+Should not be changed in any way.
