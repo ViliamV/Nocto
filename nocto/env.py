@@ -25,5 +25,5 @@ def has_env_variable(name: str, dotenv: bool, dotenv_file: Path | None, variable
 def get_env_variable(name: str, dotenv: bool, dotenv_file: Path | None, variable_overrides: VariableOverrides) -> str:
     value = _env(dotenv, dotenv_file, variable_overrides).get(name)
     if value is None:
-        raise KeyError(f"Environment variable {name!r} not set")
+        raise NotImplementedError(f"This should never happen: variable {name!r} not set")
     return value

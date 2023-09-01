@@ -1,5 +1,6 @@
 from itertools import chain
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Annotated, Optional
 
 from rich.console import Console
@@ -12,8 +13,8 @@ from nocto.variables import find_variables, replace_variables
 
 
 app = typer.Typer()
-stdout = Console()
-stderr = Console(stderr=True)
+stdout_console = Console(color_system=None)
+stderr_console = Console(stderr=True)
 File = Annotated[
     Path,
     typer.Argument(
@@ -39,6 +40,7 @@ DotenvFile = Annotated[
     ),
 ]
 Dotenv = Annotated[bool, typer.Option(help="Use dotenv to load .env file")]
+StdOut = Annotated[bool, typer.Option(help="Write output to stdout instead of temporary file")]
 Vars = Annotated[
     Optional[list[str]],  # noqa: UP007 - typer has problems with X | Y
     typer.Option(help="Directly set variable value. E.g. FOO=BAR"),
@@ -55,7 +57,7 @@ def _process_variables_overrides(variables: Vars) -> VariableOverrides:
 @app.command()
 def test(file: File, dotenv: Dotenv = False, dotenv_file: DotenvFile = None, var: Vars = None) -> None:
     """
-    Tests if local environment has all the variables required to replace Octopus-stype templated variables in `file`.
+    Tests if local environment has all the variables required to replace Octopus-style templated variables in `file`.
     """
     variables = find_variables(file)
     variable_overrides = _process_variables_overrides(var)
@@ -67,17 +69,21 @@ def test(file: File, dotenv: Dotenv = False, dotenv_file: DotenvFile = None, var
         }
     )
     if missing_variables:
-        stderr.print(f"Missing environment variable{'s' if len(missing_variables) > 1 else ''}: {missing_variables}")
+        stderr_console.print(
+            f"Missing environment variable{'s' if len(missing_variables) > 1 else ''}: {missing_variables}"
+        )
         raise typer.Exit(1)
     all_filters = chain.from_iterable(variable.filters for variable in variables)
     missing_filters = sorted({f for f in all_filters if f not in FILTERS})
     if missing_filters:
-        stderr.print(f"Filter{'s' if len(missing_filters) > 1 else ''} not implemented: {missing_filters}")
+        stderr_console.print(f"Filter{'s' if len(missing_filters) > 1 else ''} not implemented: {missing_filters}")
         raise typer.Exit(1)
 
 
 @app.command()
-def replace(file: File, dotenv: Dotenv = False, dotenv_file: DotenvFile = None, var: Vars = None) -> None:
+def replace(
+    file: File, dotenv: Dotenv = False, dotenv_file: DotenvFile = None, var: Vars = None, stdout: StdOut = False
+) -> None:
     """
     Replaces all Octopus-style template variables in `file` and writes it to temporary file.
     Returns path to temporary file.
@@ -89,9 +95,14 @@ def replace(file: File, dotenv: Dotenv = False, dotenv_file: DotenvFile = None, 
         variable: variable.process(get_env_variable(variable.name, dotenv, dotenv_file, variable_overrides))
         for variable in variables
     }
-    output_path = replace_variables(file, values)
-    stdout.print(output_path)
+    output = replace_variables(file, values)
+    if stdout:
+        stdout_console.print(output)
+    else:
+        with NamedTemporaryFile("w", delete=False) as temp_file:
+            temp_file.write(output)
+            stdout_console.print(temp_file.name)
 
 
 if __name__ == "__main__":
-    app()
+    app()  # pragma: no cover

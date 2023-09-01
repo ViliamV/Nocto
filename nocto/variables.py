@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from functools import cache, reduce
 from pathlib import Path
 import re
-from tempfile import NamedTemporaryFile
 from typing import Final
 
 from nocto.filters import FILTERS
@@ -42,12 +41,10 @@ def find_variables(file: Path) -> frozenset[Variable]:
         return frozenset(_variable_from_string(variable) for variable in VARIABLES_REGEX.findall(f.read()))
 
 
-def replace_variables(file: Path, values: dict[Variable, str]) -> Path:
+def replace_variables(file: Path, values: dict[Variable, str]) -> str:
     def replace(match: re.Match) -> str:
         variable = _variable_from_string(match.group(1))
         return values[variable]
 
-    with NamedTemporaryFile("w", delete=False) as temp_file, file.open() as in_file:
-        replaced = VARIABLES_REGEX.sub(replace, in_file.read())
-        temp_file.write(replaced)
-        return Path(temp_file.name)
+    with file.open() as f:
+        return VARIABLES_REGEX.sub(replace, f.read())
