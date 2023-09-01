@@ -1,0 +1,17 @@
+[tool.portray]
+extra_markdown_extensions = [
+  "pymdownx.superfences",
+  "pymdownx.inlinehilite",
+  "pymdownx.snippets",
+]
+modules = ["nocto"]
+
+[tool.portray.mkdocs]
+site_name = "Nocto"
+
+[tool.portray.mkdocs.theme]
+name = "material"
+palette = [
+  { scheme = "default", media = "(prefers-color-scheme: light)", toggle = { icon = "material/brightness-2", name = "Switch to dark mode" } },
+  { scheme = "slate", media = "(prefers-color-scheme: dark)", toggle = { icon = "material/brightness-5", name = "Switch to light mode" } },
+]
