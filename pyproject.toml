@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nocto"
-version = "0.0.1"
+version = "0.0.2"
 description = ""
 authors = ["Viliam Valent <viliam@valent.email>"]
 readme = "README.md"
