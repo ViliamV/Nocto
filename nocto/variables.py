@@ -22,7 +22,7 @@ class Variable:
 
     def process(self, value: str) -> str:
         """
-        Applies `self.filters` in succession of the `value`
+        Applies `self.filters` in succession on the `value`
         """
         return reduce(_apply_filter, self.filters, value)
 
