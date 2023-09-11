@@ -6,10 +6,10 @@ from typing import Annotated, Optional
 from rich.console import Console
 import typer
 
-from nocto.env import get_env_variable, has_env_variable
+from nocto.environment import Environment
 from nocto.filters import FILTERS
 from nocto.types import VariableOverrides
-from nocto.variables import find_variables, replace_variables
+from nocto.variables import Variable, find_variables, replace_variables
 
 
 app = typer.Typer()
@@ -36,14 +36,17 @@ DotenvFile = Annotated[
         writable=False,
         readable=True,
         resolve_path=True,
-        help="Optional .env file to use",
+        help="Optional .env file to use.",
     ),
 ]
-Dotenv = Annotated[bool, typer.Option(help="Use dotenv to load .env file")]
-StdOut = Annotated[bool, typer.Option(help="Write output to stdout instead of temporary file")]
+Dotenv = Annotated[bool, typer.Option(help="Use dotenv to load .env file.")]
+StdOut = Annotated[bool, typer.Option(help="Write output to stdout instead of temporary file.")]
+Test = Annotated[
+    bool, typer.Option(help="Only test if local environment has all required variables, don't replace variables.")
+]
 Vars = Annotated[
     Optional[list[str]],  # noqa: UP007 - typer has problems with X | Y
-    typer.Option(help="Directly set variable value. E.g. FOO=BAR"),
+    typer.Option(help="Directly set variable value. E.g. FOO=BAR."),
 ]
 
 
@@ -54,20 +57,11 @@ def _process_variables_overrides(variables: Vars) -> VariableOverrides:
     return tuple(tuple(var.split("=", maxsplit=1)) for var in variables)  # type: ignore[misc]
 
 
-@app.command()
-def test(file: File, dotenv: Dotenv = False, dotenv_file: DotenvFile = None, var: Vars = None) -> None:
+def _test_environment(environment: Environment, variables: frozenset[Variable]) -> None:
     """
-    Tests if local environment has all the variables required to replace Octopus-style templated variables in `file`.
+    Tests if local `environment` has all the `variables`.
     """
-    variables = find_variables(file)
-    variable_overrides = _process_variables_overrides(var)
-    missing_variables = sorted(
-        {
-            variable.name
-            for variable in variables
-            if not has_env_variable(variable.name, dotenv, dotenv_file, variable_overrides)
-        }
-    )
+    missing_variables = sorted({variable.name for variable in variables if variable.name not in environment})
     if missing_variables:
         stderr_console.print(
             f"Missing environment variable{'s' if len(missing_variables) > 1 else ''}: {missing_variables}"
@@ -82,19 +76,24 @@ def test(file: File, dotenv: Dotenv = False, dotenv_file: DotenvFile = None, var
 
 @app.command()
 def replace(
-    file: File, dotenv: Dotenv = False, dotenv_file: DotenvFile = None, var: Vars = None, stdout: StdOut = False
+    file: File,
+    dotenv: Dotenv = True,
+    dotenv_file: DotenvFile = None,
+    var: Vars = None,
+    stdout: StdOut = False,
+    test: Test = False,
 ) -> None:
     """
     Replaces all Octopus-style template variables in `file` and writes it to temporary file.
     Returns path to temporary file.
     """
-    test(file, dotenv, dotenv_file)
     variables = find_variables(file)
     variable_overrides = _process_variables_overrides(var)
-    values = {
-        variable: variable.process(get_env_variable(variable.name, dotenv, dotenv_file, variable_overrides))
-        for variable in variables
-    }
+    environment = Environment(dotenv, dotenv_file, variable_overrides)
+    _test_environment(environment, variables)
+    if test:
+        return
+    values = {variable: variable.process(environment[variable.name]) for variable in variables}
     output = replace_variables(file, values)
     if stdout:
         stdout_console.print(output)
