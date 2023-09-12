@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nocto"
-version = "1.0.0"
+version = "1.1.0"
 description = "Simple CLI tool to replace Octopus-style templated variables in file from local environment."
 authors = ["Viliam Valent <viliam@valent.email>"]
 license = "MIT"
