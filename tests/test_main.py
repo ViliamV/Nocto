@@ -59,7 +59,7 @@ def test_missing_filter() -> None:
 def test_replace_command(input_name: str, output_name: str) -> None:
     result = RUNNER.invoke(app, [str(HERE / "data" / input_name), "--dotenv-file", str(HERE / "dotenv_test")])
     assert result.exit_code == 0
-    with open(result.stdout.strip(), "r") as result_f, (HERE / "data" / output_name).open("r") as expected:
+    with Path(result.stdout.strip()).open() as result_f, (HERE / "data" / output_name).open("r") as expected:
         result_text = result_f.read()
         expected_text = expected.read()
         assert result_text == expected_text
@@ -77,7 +77,9 @@ def test_replace_command_override() -> None:
         ],
     )
     assert result.exit_code == 0
-    with open(result.stdout.strip(), "r") as result_f, (HERE / "data" / "output_2_override.txt").open("r") as expected:
+    with Path(result.stdout.strip()).open() as result_f, (HERE / "data" / "output_2_override.txt").open(
+        "r"
+    ) as expected:
         result_text = result_f.read()
         expected_text = expected.read()
         assert result_text == expected_text

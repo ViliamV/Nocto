@@ -1,12 +1,13 @@
 [tool.poetry]
 name = "nocto"
 version = "1.0.0"
-description = ""
+description = "Simple CLI tool to replace Octopus-style templated variables in file from local environment."
 authors = ["Viliam Valent <viliam@valent.email>"]
+license = "MIT"
 readme = "README.md"
-packages = [
-  { include = "nocto" },
-]
+repository = "https://github.com/ViliamV/nocto"
+homepage = "https://github.com/ViliamV/nocto"
+packages = [{ include = "nocto" }]
 
 [build-system]
 requires = ["poetry-core"]
@@ -17,27 +18,18 @@ nocto = 'nocto.main:app'
 
 [tool.poetry.dependencies]
 python = ">=3.11, <3.12"
-typer = {version = "^0.9.0", extras = ["all"]}
+typer = { version = "^0.9.0", extras = ["all"] }
 python-dotenv = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
-# Formatting
 black = ">=22.8"
 isort = "^5.11"
-# Linters + plugins
 ruff = "*"
-# Typing
 mypy = "^1.5"
-# Testing
 pytest = "^7.1"
 pytest-cov = "^4.0"
-pytest-lazy-fixture = "^0.6.3"
-coverage = { version = "^7.0", extras = ["toml"] }
-# Versioning
 bumpver = ">=2022.1120"
-# Scripting
 poethepoet = "^0.18.1"
-# Project specific dev dependencies
 
 [tool.poetry.group.docs.dependencies]
 portray = "^1.8.0"
@@ -88,9 +80,7 @@ disallow_incomplete_defs = false
 # https://docs.pytest.org/en/latest/reference/customize.html#pyproject-toml
 [tool.pytest.ini_options]
 minversion = "7.1"
-testpaths = [
-  "tests/",
-]
+testpaths = ["tests/"]
 addopts = [
   "-ra",
   "--capture=no",
@@ -109,11 +99,7 @@ cache_dir = ".cache/pytest/"
 [tool.coverage.run]
 branch = true
 data_file = ".cache/coverage"
-omit = [
-  ".venv/*",
-  "tests/*",
-  "*/__main__.py",
-]
+omit = [".venv/*", "tests/*", "*/__main__.py"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -126,22 +112,22 @@ exclude_lines = [
 
 [tool.ruff]
 select = [
-  "A",  # flake8-builtins
-  "ARG",  # flake8-unused-arguments
-  "B",  # flake8-bugbear
+  "A",   # flake8-builtins
+  "ARG", # flake8-unused-arguments
+  "B",   # flake8-bugbear
   "C4",  # flake8-comprehensions
-  "C90",  # mccabe
-  "E",  # pycodestyle
-  "F",  # Pyflakes
-  "N",  # pep8-naming
-  "NPY",  # NumPy
+  "C90", # mccabe
+  "E",   # pycodestyle
+  "F",   # Pyflakes
+  "N",   # pep8-naming
+  "NPY", # NumPy
   "PD",  # pandas-vet
-  "PIE",  # flake8-pie
-  "PLE",  # Pylint Error
-  "PTH",  # flake8-use-pathlib
-  "RUF",  # Ruff
-  "S",  # flake8-bandit
-  "SIM",  # flakes8-simplify
+  "PIE", # flake8-pie
+  "PLE", # Pylint Error
+  "PTH", # flake8-use-pathlib
+  "RUF", # Ruff
+  "S",   # flake8-bandit
+  "SIM", # flakes8-simplify
   "T20", # flake8-print
   "UP",  # pyupgrade
 ]
@@ -154,12 +140,19 @@ format = "grouped"
 ignore-init-module-imports = true
 [tool.ruff.pyupgrade]
 keep-runtime-typing = true
+[tool.ruff.per-file-ignores]
+"tests/*" = [
+  "S101",   # Use of `assert` detected
+  "ARG001", # Unused function argument
+  "ARG002", # Unused method argument
+  "ARG003", # Unused class method argument
+]
 
 [tool.poe.tasks]
 
-  [tool.poe.tasks.clean]
-  help = "Remove generated files"
-  cmd  = """
+[tool.poe.tasks.clean]
+help = "Remove generated files"
+cmd = """
     rm -rf .coverage
            .mypy_cache
            .pytest_cache
@@ -168,44 +161,45 @@ keep-runtime-typing = true
            htmlcov
   """
 
-  [tool.poe.tasks.format]
-  help = "Run formating tools on the code base"
-  sequence  = ["isort .", "black ."]
-  default_item_type = "cmd"
+[tool.poe.tasks.format]
+help = "Run formating tools on the code base"
+sequence = ["isort .", "black ."]
+default_item_type = "cmd"
 
-  [tool.poe.tasks.test]
-  help = "Run unit tests"
-  cmd  = "pytest --cov=nocto -m 'not integration and not database'"
+[tool.poe.tasks.test]
+help = "Run unit tests"
+cmd = "pytest --cov=nocto -m 'not integration and not database'"
 
-  [tool.poe.tasks.itest]
-  help = "Run integration tests"
-  cmd  = "pytest --cov=nocto -m 'integration or database'"
+[tool.poe.tasks.itest]
+help = "Run integration tests"
+cmd = "pytest --cov=nocto -m 'integration or database'"
 
-  [tool.poe.tasks.test-quick]
-  help = "Run fast unit tests"
-  cmd  = "pytest --cov=nocto -m 'not slow and not database and not integration'"
+[tool.poe.tasks.test-quick]
+help = "Run fast unit tests"
+cmd = "pytest --cov=nocto -m 'not slow and not database and not integration'"
 
-  [tool.poe.tasks.type]
-  help = "Run the mypy type checker"
-  cmd  = "mypy ."
+[tool.poe.tasks.type]
+help = "Run the mypy type checker"
+cmd = "mypy ."
 
-  [tool.poe.tasks.lint]
-  help = "Run linter"
-  cmd  = "ruff nocto"
+[tool.poe.tasks.lint]
+help = "Run linter"
+cmd = "ruff ."
 
-  [tool.poe.tasks.style]
-  help = "Validate code style"
-  sequence = ["isort . --check --diff --quiet", "black . --check --diff --quiet"]
-  default_item_type = "cmd"
+[tool.poe.tasks.style]
+help = "Validate code style"
+sequence = ["isort . --check --diff --quiet", "black . --check --diff --quiet"]
+default_item_type = "cmd"
 
-  [tool.poe.tasks.security]
-  help = "Validate code security"
-  sequence = ["bandit -r .", "pip-audit"]
-  default_item_type = "cmd"
+[tool.poe.tasks.security]
+help = "Validate code security"
+sequence = ["bandit -r .", "pip-audit"]
+default_item_type = "cmd"
 
-  [tool.poe.tasks.docs]
-  help = "Preview auto-generated documentation in browser"
-  cmd = "portray in_browser --config_file portray.toml"
-  [tool.poe.tasks.bumpver]
-  help = "Update version"
-  cmd  = "bumpver update"
+[tool.poe.tasks.docs]
+help = "Preview auto-generated documentation in browser"
+cmd = "portray in_browser --config_file portray.toml"
+
+[tool.poe.tasks.bumpver]
+help = "Update version"
+cmd = "bumpver update"

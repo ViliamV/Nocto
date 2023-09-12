@@ -23,25 +23,27 @@ pip install --user nocto
 ```bash
  Usage: nocto [OPTIONS] FILE
 
- Replaces all Octopus-style template variables in `file` and writes it to temporary file. Returns
- path to temporary file.
+ Replaces all Octopus-style template variables in `file` and writes it to temporary file.
+ Returns path to temporary file.
 
-╭─ Arguments ─────────────────────────────────────────────────────────────────────────────────────╮
-│ *    file      FILE  File in which to replace variables [default: None] [required]              │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────╮
-│ --dotenv                --no-dotenv          Use dotenv to load .env file. [default: dotenv]    │
-│ --dotenv-file                          FILE  Optional .env file to use. [default: None]         │
-│ --var                                  TEXT  Directly set variable value. E.g. FOO=BAR.         │
-│                                              [default: None]                                    │
-│ --stdout                --no-stdout          Write output to stdout instead of temporary file.  │
-│                                              [default: no-stdout]                               │
-│ --test                  --no-test            Only test if local environment has all required    │
-│                                              variables, don't replace variables.                │
-│                                              [default: no-test]                                 │
-│ --install-completion                         Install completion for the current shell.          │
-│ --show-completion                            Show completion for the current shell, to copy it  │
-│                                              or customize the installation.                     │
-│ --help                                       Show this message and exit.                        │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Arguments ─────────────────────────────────────────────────────────────────────────────────╮
+│ *    file      FILE  File in which to replace variables [default: None] [required]          │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────╮
+│ --var                                  TEXT  Directly set variable value. E.g. FOO=BAR.     │
+│                                              [default: (dynamic)]                           │
+│ --dotenv                --no-dotenv          Use dotenv to load .env file.                  │
+│                                              [default: dotenv]                              │
+│ --dotenv-file                          FILE  Optional .env file to use. [default: None]     │
+│ --stdout                --no-stdout          Write output to stdout instead of temporary    │
+│                                              file.                                          │
+│                                              [default: no-stdout]                           │
+│ --test                  --no-test            Only test if local environment has all         │
+│                                              required variables, don't replace variables.   │
+│                                              [default: no-test]                             │
+│ --install-completion                         Install completion for the current shell.      │
+│ --show-completion                            Show completion for the current shell, to copy │
+│                                              it or customize the installation.              │
+│ --help                                       Show this message and exit.                    │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

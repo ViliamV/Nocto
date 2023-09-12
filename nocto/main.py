@@ -45,14 +45,12 @@ Test = Annotated[
     bool, typer.Option(help="Only test if local environment has all required variables, don't replace variables.")
 ]
 Vars = Annotated[
-    Optional[list[str]],  # noqa: UP007 - typer has problems with X | Y
-    typer.Option(help="Directly set variable value. E.g. FOO=BAR."),
+    list[str],
+    typer.Option(default_factory=list, help="Directly set variable value. E.g. FOO=BAR."),
 ]
 
 
 def _process_variables_overrides(variables: Vars) -> VariableOverrides:
-    if variables is None:
-        return ()
     #                                                                       ↓ mypy does not understand maxsplit
     return tuple(tuple(var.split("=", maxsplit=1)) for var in variables)  # type: ignore[misc]
 
@@ -77,9 +75,9 @@ def _test_environment(environment: Environment, variables: frozenset[Variable]) 
 @app.command()
 def replace(
     file: File,
+    var: Vars,
     dotenv: Dotenv = True,
     dotenv_file: DotenvFile = None,
-    var: Vars = None,
     stdout: StdOut = False,
     test: Test = False,
 ) -> None:
